@@ -1,0 +1,4 @@
+{
+    "libs": ["browser", "webgl"],
+    "loadEagerly": ["three.js"]
+}
