@@ -5,22 +5,16 @@ should be a function of the *character* and it's movement parameters.
 */
 "use strict";
 
-var p = new THREE.Box2();
-var v = new THREE.Vector2();
-class Point = THREE.Vector2;
-class Line = THREE.Line3;
+import Point = THREE.Vector2;
 class Line {
     a: Point;
     b: Point;
-    c: Point;
-    length: number;
-    constructor (x1,y1,x2,y2) {
-        this.a = new Point(x1,y1)
-        this.b = new Point(x2,y2)
-        this.c = this.a.add(this.b).mul(0.5)
-        this.length = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1);
+    constructor(a,b,c,d) {
+	this.a = new Point(a,b);
+	this.b = new Point(c,d);
     }
-    // rmap(x,y) { return (x - this.a.x) * (this.b.y - this.a.y) - (y - this.a.y) * (this.b.x - this.a.x); }
+    rmap(x, y) { return (x - this.a.x) * (this.b.y - this.a.y)
+		 - (y - this.a.y) * (this.b.x - this.a.x); }
 }
 
 class Box {
@@ -56,7 +50,7 @@ class Box {
         if (t[0] <= 0 && t[1] <=0 && t[2] <= 0 && t[3] <= 0) return false;
 
         for(var i=0; i<=1; i+=0.02) {
-            var p = line.a.mul(1-i).add(line.b.mul(i));
+            var p = line.a.multiplyScalar(1-i).add(line.b.multiplyScalar(i));
             if (this.intersect(p)) return true;
         }
         if (1 === 1) return false;
@@ -66,7 +60,7 @@ class Box {
 var random = (function(i) { return function () { return (Math.sin(i++) + 1) * 10000 % 1; }; })(0);
 
 class Level {
-    boxes: any;
+    boxes: Box[];
     objects: any[];
     width: number; height: number;
     constructor() {
@@ -102,7 +96,19 @@ class Level {
 
             }
             return null; // either too high up or we can't jump through overhang
-        }
+    }
+    doodads() {
+	var ret = [];
+	for(var i = 0; i < this.boxes.length; i++) {
+	    var box = this.boxes[i];
+	    for(var j = box.w; j --> 0;) {
+		if (random() < 0.3) { 
+		    ret.push([["bush", "grass", "rock"][random() * 3 | 0], new Point(box.x + 0.5 + random() * (box.w-1), box.t + 0.5)]);
+		}
+	    }
+	}
+	return ret;
+    }
     connections() {
         var r = [];
         for(var i=0; i<this.objects.length; i++) {
