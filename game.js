@@ -1,4 +1,4 @@
-var player, scene, global_camera;
+var player, scene, global_camera, background;
 
 boxmat = new THREE.MeshBasicMaterial()
 var tl = new THREE.TextureLoader();
@@ -62,18 +62,23 @@ function init(cv) {
 
     gamescene.objects.map(function(o) { addBlock(o.bounds); });
     gamescene.doodads().map(function(d) { addDoodad(d); });
-    gamescene.connections().map(function(c) { addLine(c.start, c.end, {
-        "fall": 0x99aa33,
-        "jump": 0xffff00,
-        "drop": 0xaa6633,
-        "die": 0x000000,
-    }[c.type]) });
-    gamescene.connections().map(function (c) {
-        var line = new Line(c.start.x, c.start.y, c.end.x, c.end.y);
-        gamescene.objects.map(o => {
-            var x = o.bounds.intersectLine(line);
-        });
-    });
+    // gamescene.connections().map(function(c) { addLine(c.start, c.end, {
+    //     "fall": 0x99aa33,
+    //     "jump": 0xffff00,
+    //     "drop": 0xaa6633,
+    //     "die": 0x000000,
+    // }[c.type]) });
+    // gamescene.connections().map(function (c) {
+    //     var line = new Line(c.start.x, c.start.y, c.end.x, c.end.y);
+    //     gamescene.objects.map(o => {
+    //         var x = o.bounds.intersectLine(line);
+    //     });
+    // });
+
+    background = new THREE.Sprite();
+    background.material.map = tl.load("sprites/PNG/Backgrounds/blue_grass.png");
+    background.scale.set(20, 20, 20);
+    scene.add(background);
     var sprite = new THREE.Sprite();
     sprite.material.map = tl.load("sprites/PNG/Players/128x256/Pink/alienPink_stand.png");
     sprite.scale.set(1, 2, 1);
@@ -83,7 +88,7 @@ function init(cv) {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(600, 600)
-    renderer.setClearColor(0x6495ed)
+    renderer.setClearColor(0xbbffff)
     container.appendChild(renderer.domElement)
 }
 
@@ -91,14 +96,12 @@ function update() {
     player.update();
     var p = player.position;
     player.sprite.position.set(p.x, p.y, p.z);
+    background.position.set(p.x, p.y * 0.7, -1);
     camera.position.set(p.x, p.y, 30);
     global_camera.position.set(p.x, p.y, 30);
 }
-
+setInterval(update, 20);
 function render(t) {
-    u = render.u || 0;
-    for(u = u | 0; u < t; u += 10) update();
-    render.u = u;
     requestAnimationFrame(render);
     renderer.render(scene, keyboard.state["1".charCodeAt(0)] ? global_camera : camera)
 }

@@ -71,11 +71,13 @@ class Level {
         this.boxes.push(new Box(-30, -20, 60, 10));
         this.boxes.push(new Box(30, 20, 60, 50));
         for(var i=0; i<100; i++) {
-            this.boxes.push(new Box(random() * levelw - levelw/2, random() * levelh - levelh / 2, 1 + random() * 10 | 0, 1))
+            this.boxes.push(new Box((random() * levelw - levelw / 2) | 0,
+                                    (random() * levelh - levelh / 2) | 0,
+                                    1 + random() * 10 | 0, 1))
         }
         this.objects = this.boxes.map(x => ({bounds: x}));
     }
-
+    collide(box:Box) { return this.boxes.some(b => b.intersect(box)); }
     intersections(line:Line) { return this.boxes.some(b => b.intersect(line)); }
 
     * connect(_type, a,b,c,d) {   yield [_type, a,b,c,d];  }

@@ -3,5 +3,5 @@
         "target": "es6",
         "outDir": "tsc"
     },
-    "files": ["three.d.ts", "level.ts", "player.ts"]
+    "files": ["lib/three.d.ts", "level.ts", "player.ts"]
 }
