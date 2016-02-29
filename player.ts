@@ -8,7 +8,7 @@ class Player {
     constructor(level, keyboard) {
         this.level = level;
         this.keystate = keyboard.state
-        this.position = new THREE.Vector3();
+        this.position = new THREE.Vector3(0, 0, 1);
         this.velocity = new THREE.Vector3();
     }
     update() {
@@ -19,18 +19,23 @@ class Player {
         var level = this.level;
         var a = new THREE.Vector3(0, -0.01, 0);
         var isColliding = level.collide(new Box(p.x-w/4, p.y-h-0.1, w/2, 0.01));
-        v.setX(0)
+        v.setX(0); // v.setY(0);
         if (this.keystate['A'.charCodeAt(0)]) v.setX(-0.1);
         if (this.keystate['D'.charCodeAt(0)]) v.setX(0.1);
+        // if (this.keystate['W'.charCodeAt(0)]) v.setY(0.1);
+        // if (this.keystate['S'.charCodeAt(0)]) v.setY(-0.1);
         if (this.keystate[' '.charCodeAt(0)] && isColliding) v.setY(0.25);
         if (v.lengthSq() < 1) v.set(a.x + v.x, a.y + v.y, a.z + v.z);
+        var ignoreCollision = level.collide(new Box(p.x-w/2, p.y-h, w, h));
         function tryMove(tryVelocity) {
             var newPos = p.addVectors(p, tryVelocity);
             var newBox = new Box(newPos.x-w/2, newPos.y-h, w, h);
-            var collision = level.collide(newBox);
-            if (collision) {
-                p.copy(_p);
-                return false;
+            if (!ignoreCollision) { 
+                var collision = level.collide(newBox);
+                if (collision) {
+                    p.copy(_p);
+                    return false;
+                }
             }
             p.copy(newPos);
             return true;

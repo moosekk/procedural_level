@@ -2632,6 +2632,7 @@ declare module THREE {
         containsBox(box: Box2): boolean;
         getParameter(point: Vector2): Vector2;
         isIntersectionBox(box: Box2): boolean;
+        intersectsBox(box: Box2): boolean;        
         clampPoint(point: Vector2, optionalTarget?: Vector2): Vector2;
         distanceToPoint(point: Vector2): number;
         intersect(box: Box2): Box2;

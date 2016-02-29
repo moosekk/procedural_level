@@ -24,7 +24,7 @@ function addBlock(box, color) {
     tex.needsUpdate = true;
     var m = new THREE.SpriteMaterial({map: tex})
     var s = new THREE.Sprite(m);
-    s.position.set(box.c.x, box.c.y, 0)
+    s.position.set(box.center().x, box.center().y, 0);
     s.scale.set(box.w, box.h, 0)
     scene.add(s);
 }
@@ -34,7 +34,7 @@ function addDoodad(data) {
     var tex = tl.load("sprites/PNG/Tiles/" + data[0] + ".png");
     var m = new THREE.SpriteMaterial({map: tex})
     var s = new THREE.Sprite(m);
-    s.position.set(pos.x, pos.y, 0)
+    s.position.set(pos.x, pos.y, 0.1)
     scene.add(s);
 }
 
@@ -44,7 +44,7 @@ function addLine(start, end, type) {
     g.vertices.push(new THREE.Vector3(end.x, end.y, 0.01))
     var s = new THREE.Line(g, new THREE.LineBasicMaterial({ color: type || 0xffffff }));
     scene.add(s);
-    addBlock({x: end.x, y: end.y, c: end, w: 0.3, h: 0.3}, type || 0xffffff);
+    addBlock(new Box(end.x, end.y, 0.3, 0.3), type || 0xffffff);
 }
 
 function init(cv) {
@@ -83,6 +83,7 @@ function init(cv) {
     sprite.material.map = tl.load("sprites/PNG/Players/128x256/Pink/alienPink_stand.png");
     sprite.scale.set(1, 2, 1);
     sprite.position = player.position;
+    
     player.sprite = sprite;
     scene.add(sprite);
 

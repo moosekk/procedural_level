@@ -1,63 +1,66 @@
+"use strict";
 /*
 The Level class stores a set of objects in the level and contains functions
 that test for connectedness of each object. Note that technically, connectedness
 should be a function of the *character* and it's movement parameters.
 */
-"use strict";
-
-import Point = THREE.Vector2;
-class Line {
-    a: Point;
-    b: Point;
-    constructor(a,b,c,d) {
-	this.a = new Point(a,b);
-	this.b = new Point(c,d);
-    }
-    rmap(x, y) { return (x - this.a.x) * (this.b.y - this.a.y)
-		 - (y - this.a.y) * (this.b.x - this.a.x); }
+function linkRight(box:Box, gap, height, width) {
+    return new Box(box.r + gap, box.t - height, width, height);
 }
-
-class Box {
-    w : number;
-    h : number;
-    x : number;
-    y : number;
-    t : number;
-    r : number;
-    c: Point;
-    constructor(x, y, w, h) {
-        this.w = w;
-        this.h = h;
-        this.x = x;
-        this.y = y;
-        this.t = y + h;
-        this.r = x + w;
-        this.c = new Point(x + w / 2, y + h / 2);
-    }
-    intersect(o:Point|Line|Box) {
-        if (o instanceof Point) return this.intersectPt(o);
-        if (o instanceof Line) return this.intersectLine(o);
-        if (o instanceof Box) return this.intersectBox(o);
-    }
-    intersectPt(pt:Point) { return this.x < pt.x && pt.x < this.r && this.y < pt.y && pt.y < this.t; }
-    intersectBox(box:Box) { return this.r > box.x && this.x < box.r && this.t > box.y && this.y < box.t; }
-    intersectLine(line:Line) {
-        var t = [line.rmap(this.x, this.y),
-                 line.rmap(this.x, this.t),
-                 line.rmap(this.r, this.y),
-                 line.rmap(this.r, this.t)]
-        if (t[0] >= 0 && t[1] >=0 && t[2] >= 0 && t[3] >= 0) return false;
-        if (t[0] <= 0 && t[1] <=0 && t[2] <= 0 && t[3] <= 0) return false;
-
-        for(var i=0; i<=1; i+=0.02) {
-            var p = line.a.multiplyScalar(1-i).add(line.b.multiplyScalar(i));
-            if (this.intersect(p)) return true;
+function linkUpr(box:Box) {
+    return new Box(randi(box.x + 1, box.r + 3), box.t + 2, randi(1, 8), 1);
+}
+function linkUpl(box:Box) {
+    var w = randi(1, 8); return new Box(randi(box.x-w-2, box.r-w-1), box.t+2, w, 1);
+}
+function linkUp(box:Box) {
+    return randarr([linkUpl, linkUpr])(box);
+}
+function drop(box:Box) {
+    var w = randi(4, 8), d = randi(5, 15);
+    return new Box(box.r-w/2, box.y - d, w, randi(1, 4));
+}
+function * repeat(n, f) {
+    for(var i=0; i<n; i++) yield f();
+}
+function * generate() {
+    var cur = new Box(-5, -4, 10, 1);
+    yield cur;
+    var RIGHT = 0, UPRIGHT = 1, UPLEFT = 2, UP = 3, DROP = 4;
+    var curdir = 0, prevdir = 0;
+    yield * repeat(3, () => cur = linkRight(cur, 2, randi(1, 4), randi(1, 5)));
+    for(var i=0; i<20; i++) {
+        var newdir = randarr([RIGHT, RIGHT, RIGHT, UPRIGHT, UPLEFT, UP, DROP, DROP, DROP]);
+        switch(newdir) {
+        case RIGHT:
+            if (prevdir == RIGHT) continue;            
+            if (prevdir == UPLEFT)
+                yield cur = linkUpl(cur);
+            var f = () => cur = linkRight(cur, randi(1,5),randi(1,4),randi(1,5));
+            yield * repeat(randi(3, 6), f);
+            break;
+        case 1:
+            yield * repeat(4, () => cur = linkUpr(cur))
+            break;
+        case UPLEFT:
+            if (prevdir == RIGHT) continue;
+            cur.navi = "upl";
+            yield * repeat(randi(1, 3), () => cur = linkUpl(cur))
+            break;
+        case UP:
+            yield * repeat(randi(2, 6), () => cur = linkUp(cur))
+            break;
+        case DROP:
+            if (prevdir == UPLEFT || prevdir == UP) continue;
+            cur.navi = "drop";
+            yield * repeat(randi(1, 3), () => cur = drop(cur));
+            break;
+        default: break;
         }
-        if (1 === 1) return false;
+        curdir = newdir;
+        prevdir = curdir;
     }
 }
-
-var random = (function(i) { return function () { return (Math.sin(i++) + 1) * 10000 % 1; }; })(0);
 
 class Level {
     boxes: Box[];
@@ -67,18 +70,17 @@ class Level {
         this.boxes = [];
         var levelw = 100, levelh = 50
         this.width = levelw; this.height = levelh;
-        this.boxes.push(new Box(-levelw/2, -50, 300, 10));
-        this.boxes.push(new Box(-30, -20, 60, 10));
-        this.boxes.push(new Box(30, 20, 60, 50));
-        for(var i=0; i<100; i++) {
-            this.boxes.push(new Box((random() * levelw - levelw / 2) | 0,
-                                    (random() * levelh - levelh / 2) | 0,
-                                    1 + random() * 10 | 0, 1))
+        for(var box of generate()) this.boxes.push(box);
+        for(var i=0; i<this.boxes.length; i++) {
+            var box = this.boxes[i];
+            if (this.collide(box)) this.boxes[i] = null;
         }
+        this.boxes = this.boxes.filter(x => x != null);
         this.objects = this.boxes.map(x => ({bounds: x}));
     }
-    collide(box:Box) { return this.boxes.some(b => b.intersect(box)); }
-    intersections(line:Line) { return this.boxes.some(b => b.intersect(line)); }
+    collide(box:Box) { return this.boxes.some(b => b && b != box && b.intersects(box)); }
+    
+    intersections(line:Line) { return this.boxes.some(b => b.intersects(line)); }
 
     * connect(_type, a,b,c,d) {   yield [_type, a,b,c,d];  }
     * connected (a:Box, b:Box) : Iterable<any> {
@@ -101,14 +103,24 @@ class Level {
     }
     doodads() {
 	var ret = [];
+        ret.push(["signRight", new Point(-2, -2.5)]);        
 	for(var i = 0; i < this.boxes.length; i++) {
 	    var box = this.boxes[i];
-	    for(var j = box.w; j --> 0;) {
-		if (random() < 0.3) { 
-		    ret.push([["bush", "grass", "rock"][random() * 3 | 0], new Point(box.x + 0.5 + random() * (box.w-1), box.t + 0.5)]);
+            if (box.navi == "upl")
+                ret.push(['signLeft', new Point(box.x + box.w / 2, box.t + 0.5)])
+            if (box.navi == "drop")
+                ret.push(['boxItem', new Point(box.r - 0.6, box.t - 0.6)])
+
+            for(var j = box.w * 2; j --> 0;) {
+		if (random() < 0.2) { 
+		    ret.push([randarr(["bush", "grass", "rock", "grass", "bush", "grass", "rock", "mushroomBrown", "mushroomRed"]), new Point(box.x + 0.5 + random() * (box.w-1), box.t + 0.5)]);
 		}
 	    }
 	}
+        var sign = this.boxes[this.boxes.length-1].max
+        ret.push(["signExit", {x:sign.x-1.5, y:sign.y+0.5}]);
+        ret.push(["doorClosed_mid", {x:sign.x-2.5, y:sign.y+0.5}]);
+        ret.push(["doorClosed_top", {x:sign.x-2.5, y:sign.y+1.5}]);                                
 	return ret;
     }
     connections() {
@@ -122,7 +134,7 @@ class Level {
                     if (conn instanceof Array) {
                         type = conn[0]
                         var line = new Line(conn[1], conn[2], conn[3], conn[4]);
-                        if (this.boxes.some(b => b.intersect(line))) continue;
+                        if (this.boxes.some(b => b.intersects(line))) continue;
                         start = {x:conn[1], y:conn[2]};
                         end =   {x:conn[3], y:conn[4]};
                     } else {
@@ -136,12 +148,4 @@ class Level {
         }
         return r;
     }
-}
-
-function x_gap(a, b) {
-    return Math.max(b.x - a.r, a.x - b.r)
-}
-
-function overhang(a, b) {
-    if (b.x - a.x < 0 && a.r - b.r < 0) return -1
 }
