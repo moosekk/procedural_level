@@ -14,6 +14,6 @@ class Box extends THREE.Box2 {
         if (o instanceof Point) return this.containsPoint(o);
     }
 }
-var random = (function(i) { return function () { return (Math.sin(i++) + 1) * 10000 % 1; }; })(0);
+var random = (i => function () { return (Math.sin(i++) + 1) * 10000 % 1; })(+window.location.hash.slice(1)|0);
 function randi(a, b) { return a + (random() * (b - a)) | 0; }
 function randarr(arr:any[]) { return arr[random() * arr.length | 0]; }

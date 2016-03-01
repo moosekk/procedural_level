@@ -7,7 +7,7 @@
 </head>
 <body>
   <div id='container'> </div>
-  <div id='instructions'>A - left<br>D - right<br>Space - Jump</div>
+  <div id='instructions'>A - left<br>D - right<br>Space - Jump<br><a id='randomize' href='#'>Randomize</a></div>
   <script src='lib/three.js'> </script>
   <script src='lib/polyfill.min.js'> </script>
   <script src='tsc/base.js'> </script>
@@ -15,6 +15,7 @@
   <script src='tsc/player.js'> </script>
   <script src='game.js'> </script>
   <script>
+    randomize.onclick = function() { location.hash = '#' + (Math.random() * 1000000 | 0); location.reload(); return false; }
     init();
     render()
   </script>
