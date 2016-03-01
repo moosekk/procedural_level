@@ -1,11 +1,15 @@
 <head>
-  <style> #container { float:left; padding:10px; background:#269; }
+  <style>
+    body { background:#ade; }
+    #container { width: 600px; margin:auto; padding:10px; background:#269; }
+    #instructions { white-space:pre; text-align:center; }
   </style>
 </head>
 <body>
   <div id='container'> </div>
+  <div id='instructions'>A - left<br>D - right<br>Space - Jump</div>
   <script src='lib/three.js'> </script>
-  <script src='tsc/base.js'> </script>  
+  <script src='tsc/base.js'> </script>
   <script src='tsc/level.js'> </script>
   <script src='tsc/player.js'> </script>
   <script src='game.js'> </script>

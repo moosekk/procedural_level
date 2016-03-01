@@ -61,20 +61,7 @@ function init(cv) {
     scene.add(light)
 
     gamescene.objects.map(function(o) { addBlock(o.bounds); });
-    gamescene.doodads().map(function(d) { addDoodad(d); });
-    // gamescene.connections().map(function(c) { addLine(c.start, c.end, {
-    //     "fall": 0x99aa33,
-    //     "jump": 0xffff00,
-    //     "drop": 0xaa6633,
-    //     "die": 0x000000,
-    // }[c.type]) });
-    // gamescene.connections().map(function (c) {
-    //     var line = new Line(c.start.x, c.start.y, c.end.x, c.end.y);
-    //     gamescene.objects.map(o => {
-    //         var x = o.bounds.intersectLine(line);
-    //     });
-    // });
-
+    for(var d of gamescene.doodads()) addDoodad(d);
     background = new THREE.Sprite();
     background.material.map = tl.load("sprites/PNG/Backgrounds/blue_grass.png");
     background.scale.set(20, 20, 20);
@@ -83,13 +70,13 @@ function init(cv) {
     sprite.material.map = tl.load("sprites/PNG/Players/128x256/Pink/alienPink_stand.png");
     sprite.scale.set(1, 2, 1);
     sprite.position = player.position;
-    
+
     player.sprite = sprite;
     scene.add(sprite);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(600, 600)
-    renderer.setClearColor(0xbbffff)
+    renderer.setClearColor(0xc2eeee)
     container.appendChild(renderer.domElement)
 }
 
