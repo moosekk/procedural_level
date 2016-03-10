@@ -96,6 +96,5 @@ function update() {
 setInterval(update, 20);
 function render(t) {
     requestAnimationFrame(render);
-    renderer.render(scene, keyboard.state["1".charCodeAt(0)] ? global_camera : camera);
+    renderer.render(scene, keyboard.state["Z".charCodeAt(0)] ? global_camera : camera);
 }
-

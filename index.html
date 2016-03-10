@@ -3,11 +3,17 @@
     body { background:#ade; }
     #container { width: 600px; margin:auto; padding:10px; background:#269; }
     #instructions { white-space:pre; text-align:center; }
+    #toplist { float:left; list-style-type:none; }
   </style>
 </head>
 <body>
+  <div id='toplist'>
+    <h3>Levels Completed</h3>
+    <ul id='toplistul'> </ul>
+    <a href='#' onclick='localStorage.clear()'>Clear Scores</a>
+  </div>
   <div id='container'> </div>
-  <div id='instructions'>A - left<br>D - right<br>Space - Jump<br><a id='randomize' href='#'>Randomize</a></div>
+  <div id='instructions'>A - left<br>D - right<br>Space - Jump<br>Z - zoom<br><a id='randomize' href='#'>Randomize</a></div>
   <script src='lib/three.js'> </script>
   <script src='lib/polyfill.min.js'> </script>
   <script src='tsc/base.js'> </script>
@@ -15,7 +21,8 @@
   <script src='tsc/player.js'> </script>
   <script src='game.js'> </script>
   <script>
-    randomize.onclick = function() { location.hash = '#' + (Math.random() * 1000000 | 0); location.reload(); return false; }
+    window.onhashchange = function() { location.reload(); };
+    randomize.onclick = function() { location.hash = '#' + (Math.random() * 1000000 | 0); return false; }
     init();
     render()
   </script>
