@@ -18,7 +18,7 @@ function * generate() {
     yield newbox;
     function * repeat(n, f) { for(var i=0; i<n; i++) yield newbox = f(newbox); }
     var RIGHT = 0, UPRIGHT = 1, UPLEFT = 2, UP = 3, DROP = 4;
-    var curdir = 0, prevdir = 0;
+    var prevdir = 0;
     yield * repeat(3, () => newbox = linkRight(newbox, 2, randi(1, 4), randi(1, 5)));
     for(var i=localStorage.getItem('level_size') || 20; i-->0; ) {
         var newdir = randarr([RIGHT, RIGHT, RIGHT, UPRIGHT, UPLEFT, UP, DROP, DROP, DROP]);
@@ -41,8 +41,7 @@ function * generate() {
             yield * repeat(randi(1, 3), drop); break;
         default: break;
         }
-        curdir = newdir;
-        prevdir = curdir;
+        prevdir = newdir;
     }
     yield linkRight(newbox, 2, 5, 5);
 }
